@@ -1,5 +1,7 @@
 <?php
 
+namespace app\models\expressions;
+
 class Stack {
 
     protected $data = array();

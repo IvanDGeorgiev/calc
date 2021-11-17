@@ -1,5 +1,7 @@
 <?php
 
+namespace app\models\expressions;
+
 class Addition extends Operator {
 
     protected $precidence = 4;

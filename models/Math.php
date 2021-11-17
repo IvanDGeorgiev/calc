@@ -1,14 +1,10 @@
 <?php
 
-require_once 'Stack.php';
-require_once 'TerminalExpression.php';
-require_once 'Operator.php';
-require_once 'Addition.php';
-require_once 'Subtraction.php';
-require_once 'Division.php';
-require_once 'Multiplication.php';
-require_once 'Parenthesis.php';
-require_once 'Number.php';
+namespace app\models;
+
+use app\models\expressions\Stack;
+use app\models\expressions\TerminalExpression;
+use RuntimeException;
 
 class Math {
 

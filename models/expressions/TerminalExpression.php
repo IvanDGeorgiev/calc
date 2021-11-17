@@ -1,5 +1,9 @@
 <?php
 
+namespace app\models\expressions;
+
+use yii\base\Exception;
+
 abstract class TerminalExpression {
 
     protected $value = '';

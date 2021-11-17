@@ -1,5 +1,7 @@
 <?php
 
+namespace app\models\expressions;
+
 class Parenthesis extends TerminalExpression {
 
     protected $precidence = 6;

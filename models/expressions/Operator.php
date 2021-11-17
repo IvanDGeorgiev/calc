@@ -1,5 +1,7 @@
 <?php
 
+namespace app\models\expressions;
+
 abstract class Operator extends TerminalExpression {
 
     protected $precidence = 0;

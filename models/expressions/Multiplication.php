@@ -1,5 +1,7 @@
 <?php
 
+namespace app\models\expressions;
+
 class Multiplication extends Operator {
 
     protected $precidence = 5;
