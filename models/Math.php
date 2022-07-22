@@ -2,25 +2,36 @@
 
 namespace app\models;
 
+use app\models\expressions\Operator;
 use app\models\expressions\Stack;
 use app\models\expressions\TerminalExpression;
 use RuntimeException;
+use yii\base\Exception;
 
 class Math {
 
-    protected $variables = array();
-
-    public function evaluate($string) {
+    /** Evaluates and runs the math expression
+     * @param $string
+     * @return string
+     * @throws Exception
+     */
+    public function evaluate($string): string {
         $stack = $this->parse($string);
         return $this->run($stack);
     }
 
-    public function parse($string) {
+    /**
+     * Parses the math expression into the correct order of operations
+     * @param $string
+     * @return Stack This is the array containing all the mathematical operations in their correct order of operation
+     * @throws Exception
+     */
+    private function parse($string): Stack {
         $tokens = $this->tokenize($string);
         $output = new Stack();
         $operators = new Stack();
         foreach ($tokens as $token) {
-            $token = $this->extractVariables($token);
+            //$token = $this->extractVariables($token);
             $expression = TerminalExpression::factory($token);
             if ($expression->isOperator()) {
                 $this->parseOperator($expression, $output, $operators);
@@ -39,29 +50,32 @@ class Math {
         return $output;
     }
 
-    public function registerVariable($name, $value) {
-        $this->variables[$name] = $value;
-    }
-
-    public function run(Stack $stack) {
+    /**
+     * Run the calculation
+     * @param Stack $stack
+     * @return string
+     * @throws Exception
+     */
+    private function run(Stack $stack): string {
+        //While there are operators left
         while (($operator = $stack->pop()) && $operator->isOperator()) {
+            //Do the calculations
             $value = $operator->operate($stack);
             if (!is_null($value)) {
                 $stack->push(TerminalExpression::factory($value));
             }
         }
+
+        //return the calculated answer
         return $operator ? $operator->render() : $this->render($stack);
     }
 
-    protected function extractVariables($token) {
-        if ($token[0] == '$') {
-            $key = substr($token, 1);
-            return isset($this->variables[$key]) ? $this->variables[$key] : 0;
-        }
-        return $token;
-    }
-
-    protected function render(Stack $stack) {
+    /**
+     * Only for error handling if something goes wrong with the parsing or calculation
+     * @param Stack $stack
+     * @return string
+     */
+    protected function render(Stack $stack): string {
         $output = '';
         while (($el = $stack->pop())) {
             $output .= $el->render();
@@ -72,49 +86,77 @@ class Math {
         throw new RuntimeException('Could not render output');
     }
 
-    protected function parseParenthesis(TerminalExpression $expression, Stack $output, Stack $operators) {
+    /**
+     * Handles the parenthesis and puts operators in their correct order of operations
+     * @param TerminalExpression $expression
+     * @param Stack $output
+     * @param Stack $operators
+     */
+    private function parseParenthesis(TerminalExpression $expression, Stack $output, Stack $operators) {
+        //If open parenthesis
         if ($expression->isOpen()) {
+            //Add the parenthesis to the operator stack
             $operators->push($expression);
+
         } else {
+            //If Closed parenthesis
             $clean = false;
+            //Add all non parenthesis operators to the output stack and remove them from the operators stack until another parenthesis met
             while (($end = $operators->pop())) {
                 if ($end->isParenthesis()) {
+                    //Another parenthesis has been found
                     $clean = true;
                     break;
                 } else {
                     $output->push($end);
                 }
             }
+            //If the parenthesis count is mismatched
             if (!$clean) {
                 throw new RuntimeException('Mismatched Parenthesis');
             }
         }
     }
 
-    protected function parseOperator(TerminalExpression $expression, Stack $output, Stack $operators) {
-        $end = $operators->poke();
-        if (!$end) {
-            $operators->push($expression);
-        } elseif ($end->isOperator()) {
+    /**
+     * Parses operators and sorts them into the output stack according to their operator precedence
+     * @param Operator $operator
+     * @param Stack $output
+     * @param Stack $operators
+     */
+    private function parseOperator(Operator $operator, Stack $output, Stack $operators) {
+        //Get the last operator, this can be a parenthesis
+        $lastOp = $operators->poke();
+
+        //Check if not empty and not a parenthesis
+        if($lastOp && $lastOp->isOperator()) {
             do {
-                if ($expression->isLeftAssoc() && $expression->getPrecidence() <= $end->getPrecidence()) {
-                    $output->push($operators->pop());
-                } elseif (!$expression->isLeftAssoc() && $expression->getPrecidence() < $end->getPrecidence()) {
-                    $output->push($operators->pop());
-                } else {
+                //Check if the current operator has a higher operator precedence than the last operator
+                if ($operator->getPrecedence() > $lastOp->getPrecedence()) {
                     break;
                 }
+
+                //Add the last operator to the output stack and remove it from the operator stack
+                $output->push($operators->pop());
+
+                //While there are operators left
             } while (($end = $operators->poke()) && $end->isOperator());
-            $operators->push($expression);
-        } else {
-            $operators->push($expression);
         }
+
+        //Add the operator to the operator stack
+        $operators->push($operator);
     }
 
-    protected function tokenize($string) {
+    /**
+     * Splits an input string into tokens with a specific conditions, removes all whitespaces and empty tokens and returns an array
+     * @param $string
+     * @return array
+     */
+    private function tokenize($string): array {
+        // Split the input string into tokens with given conditions
         $parts = preg_split('((\d+|\+|-|\(|\)|\*|/)|\s+)', $string, null, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE);
-        $parts = array_map('trim', $parts);
-        return $parts;
-    }
 
+        // Remove whitespaces and return array
+        return array_map('trim', $parts);
+    }
 }

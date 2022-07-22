@@ -4,18 +4,14 @@ namespace app\models\expressions;
 
 abstract class Operator extends TerminalExpression {
 
-    protected $precidence = 0;
-    protected $leftAssoc = true;
+    //Operator precedence
+    protected $precedence = 0;
 
-    public function getPrecidence() {
-        return $this->precidence;
+    public function getPrecedence(): int {
+        return $this->precedence;
     }
 
-    public function isLeftAssoc() {
-        return $this->leftAssoc;
-    }
-
-    public function isOperator() {
+    public function isOperator(): bool {
         return true;
     }
 }

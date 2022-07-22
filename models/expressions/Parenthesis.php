@@ -4,24 +4,35 @@ namespace app\models\expressions;
 
 class Parenthesis extends TerminalExpression {
 
-    protected $precidence = 6;
+    //Operator precedence, 3 is the highest in this context
+    protected $precedence = 3;
 
+    /**
+     * @param Stack $stack
+     */
     public function operate(Stack $stack) {
+
     }
 
-    public function getPrecidence() {
-        return $this->precidence;
+    /**
+     * @return int
+     */
+    public function getPrecedence(): int {
+        return $this->precedence;
     }
 
-    public function isNoOp() {
+    /**
+     * @return bool
+     */
+    public function isParenthesis(): bool {
         return true;
     }
 
-    public function isParenthesis() {
-        return true;
-    }
-
-    public function isOpen() {
+    /**
+     * Returns wether this instance of Parenthesis is open or not
+     * @return bool
+     */
+    public function isOpen(): bool {
         return $this->value == '(';
     }
 }

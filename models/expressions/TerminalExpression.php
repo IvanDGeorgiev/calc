@@ -12,8 +12,14 @@ abstract class TerminalExpression {
         $this->value = $value;
     }
 
+    /**
+     * Checks the type of given expression and creates and returns a corresponding Object
+     * @param $value
+     * @return Addition|Division|Multiplication|Number|Parenthesis|Subtraction|TerminalExpression
+     * @throws Exception
+     */
     public static function factory($value) {
-        if (is_object($value) && $value instanceof TerminalExpression) {
+        if ($value instanceof TerminalExpression) {
             return $value;
         } elseif (is_numeric($value)) {
             return new Number($value);
@@ -31,21 +37,32 @@ abstract class TerminalExpression {
         throw new Exception('Undefined Value ' . $value);
     }
 
+    /**
+     * Run arithmetic operation
+     * @param Stack $stack
+     * @return mixed
+     */
     abstract public function operate(Stack $stack);
 
-    public function isOperator() {
+    /**
+     * @return bool
+     */
+    public function isOperator(): bool {
         return false;
     }
 
-    public function isParenthesis() {
+    /**
+     * @return bool
+     */
+    public function isParenthesis(): bool {
         return false;
     }
 
-    public function isNoOp() {
-        return false;
-    }
-
-    public function render() {
+    /**
+     * Returns the value of the expression
+     * @return string
+     */
+    public function render(): string {
         return $this->value;
     }
 }

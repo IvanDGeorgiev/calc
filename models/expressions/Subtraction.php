@@ -4,11 +4,17 @@ namespace app\models\expressions;
 
 class Subtraction extends Operator {
 
-    protected $precidence = 4;
+    //Operator precedence
+    protected $precedence = 1;
 
+    /**
+     * Run subtraction
+     * @param Stack $stack
+     * @return mixed
+     */
     public function operate(Stack $stack) {
-        $left = $stack->pop()->operate($stack);
         $right = $stack->pop()->operate($stack);
-        return $right - $left;
+        $left = $stack->pop()->operate($stack);
+        return $left - $right;
     }
 }
